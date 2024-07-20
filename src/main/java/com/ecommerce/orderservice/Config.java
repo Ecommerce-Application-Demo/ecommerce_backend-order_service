@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
 
 @Configuration
 public class Config {
@@ -33,11 +37,11 @@ public class Config {
                         .url("https://github.com/Ecommerce-Application-Demo/ecommerce-backend"));
     }
 
-//    @Scheduled(fixedDelay = 1000*60*5)
-//    void renderRunner() {
-//        if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
-//            RestTemplate restTemplate = new RestTemplate();
-//            restTemplate.getForEntity("https://ecommerce-backend-product-service.onrender.com/product/actuator/info", String.class);
-//        }
-//    }
+    @Scheduled(fixedDelay = 1000*60*5)
+    void renderRunner() {
+        if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getForEntity("https://ecommerce-backend-order-service.onrender.com/order/actuator/info", String.class);
+        }
+    }
 }
