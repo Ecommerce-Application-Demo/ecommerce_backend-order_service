@@ -18,7 +18,7 @@ WORKDIR /app
 COPY --from=DEPS /app/build/libs /app/build
 
 # Expose the port that your Spring Boot application will run on
-EXPOSE 8550
+EXPOSE 8570
 
 # Specify the command to run on container startup
 CMD ["java", "-jar", "/app/build/OrderService.jar"]

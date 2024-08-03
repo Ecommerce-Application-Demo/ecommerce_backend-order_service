@@ -1,5 +1,7 @@
 package com.ecommerce.orderservice;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -15,6 +17,11 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 
 @Configuration
+@SecurityScheme(name = "Bearer Authentication",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        scheme = "bearer"
+)
 public class Config {
 
     @Autowired
@@ -38,7 +45,7 @@ public class Config {
     }
 
     @Scheduled(fixedDelay = 1000*60*5)
-    void renderRunner() {
+    void keepAlive() {
         if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.getForEntity("https://ecommerce-backend-order-service.onrender.com/order/actuator/info", String.class);
