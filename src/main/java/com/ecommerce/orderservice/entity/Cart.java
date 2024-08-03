@@ -17,6 +17,6 @@ public class Cart {
     private String cartId;
     private String userId;
     private String deviceId;
-    @OneToMany(mappedBy = "orderId",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cartId",cascade = CascadeType.ALL)
     private List<CartItem> cartItems;
 }
