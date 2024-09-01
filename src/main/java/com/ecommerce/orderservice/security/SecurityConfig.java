@@ -32,7 +32,7 @@ public class SecurityConfig {
     String[] publicURL= {
             "/actuator/**",
             "/v3/api-docs","/swagger-ui/**","/swagger-ui.html","/swagger-resources/**","/v3/api-docs/**",
-            "/swagger-ui/**","/swagger-ui/","/swagger-ui","/cart/index"
+            "/swagger-ui/**","/swagger-ui/","/swagger-ui","/cart/**"
     };
 
     @Bean
@@ -44,7 +44,8 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(req -> req.requestMatchers("/**").authenticated())
+                .authorizeHttpRequests(req -> req.requestMatchers("/**").authenticated()
+                        .requestMatchers(publicURL).permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
