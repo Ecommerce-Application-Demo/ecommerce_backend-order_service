@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -86,6 +87,28 @@ public class CartController {
         }
          return new ResponseEntity<>(cartService.getCartItems(browserSessionId,request), HttpStatus.OK);
     }
+
+    @Operation(summary = "To remove product from cart", description = "This API is used to remove product from cart for both " +
+            "logged in and guest users. Browser session id have to be shared in the header for guest users.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated Cart Details",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CartResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "API Secret is Invalid or API Secret is Invalid",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @DeleteMapping("/remove")
+    public ResponseEntity<CartResponse> removeFromCart(@RequestBody List<String> skuId, HttpServletRequest request) {
+
+        String browserSessionId = null;
+        if (request.getHeader(Constants.BROWSER_SESSION_ID) != null) {
+            browserSessionId = request.getHeader(Constants.BROWSER_SESSION_ID);
+        }
+        return new ResponseEntity<>(cartService.removeItemFromCart(browserSessionId,skuId,request), HttpStatus.OK);
+    }
+
+
 
     @Operation(summary = "Unauthenticated index API")
     @GetMapping("/index")

@@ -6,7 +6,6 @@ import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,10 +31,6 @@ public class Config {
     @Autowired
     Environment env;
 
-    @Bean
-    ModelMapper modelMapper(){
-        return new ModelMapper();
-    }
 
     @Bean
     RestClient productRestClient() {

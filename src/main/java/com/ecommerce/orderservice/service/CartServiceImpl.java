@@ -10,7 +10,6 @@ import com.ecommerce.orderservice.repository.CartItemRepository;
 import com.ecommerce.orderservice.repository.CartRepository;
 import com.ecommerce.orderservice.service.declaration.CartService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.core.Authentication;
@@ -30,8 +29,6 @@ public class CartServiceImpl implements CartService {
     CartItemRepository cartItemRepository;
     @Autowired
     RestClient restClient;
-    @Autowired
-    ModelMapper modelMapper;
 
     @Override
     public CartResponse addToCartLoggedInUser(CartRequest cartRequest, String browserSessionId) {
@@ -133,7 +130,25 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Object removeItemFromCart(String deviceId, String skuId) {
+    public CartResponse removeItemFromCart(String browserSessionId, List<String> skuId, HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            Cart cart = cartRepository.findByUserId(WishlistServiceImpl.getUserId());
+            if (cart != null) {
+                cartItemRepository.deleteSkuByCartId(cart.getCartId(), skuId.toArray(String[]::new));
+                return new CartResponse(cart.getCartId(), null, getCartProductDetails(cart.getCartId()),
+                                        cartItemRepository.countItemsByCartId(cart.getCartId()));
+            }
+        } else if (request.getHeader(Constants.JWT_HEADER_NAME) == null) {
+
+            Cart cart = cartRepository.findByBrowserSessionId(browserSessionId);
+            if (cart != null) {
+                cartItemRepository.deleteSkuByCartId(cart.getCartId(), skuId.toArray(String[]::new));
+                return new CartResponse(cart.getCartId(), browserSessionId, getCartProductDetails(cart.getCartId()),
+                        cartItemRepository.countItemsByCartId(cart.getCartId()));
+            }
+        }
         return null;
     }
 

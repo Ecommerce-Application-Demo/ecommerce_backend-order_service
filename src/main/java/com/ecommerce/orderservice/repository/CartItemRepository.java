@@ -24,6 +24,7 @@ public interface CartItemRepository extends ListCrudRepository<CartItem,String> 
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM order_service.cart_item c WHERE c.cart_id = ?1", nativeQuery = true)
-    void deleteByCartId(String cartId);
+    @Query(value = "DELETE FROM order_service.cart_item c WHERE c.cart_id = ?1 " +
+                    "AND c.sku_id = ANY(CAST(?2 AS text[])) OR CAST(?2 AS text[]) IS NULL", nativeQuery = true)
+    void deleteSkuByCartId(String cartId, String[] skuIds);
 }
