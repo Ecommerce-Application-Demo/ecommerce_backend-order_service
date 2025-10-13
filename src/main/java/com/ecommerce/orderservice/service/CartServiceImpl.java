@@ -46,9 +46,8 @@ public class CartServiceImpl implements CartService {
 
             if (guestCart != null) {                 // if user loggedIn in a browser with guest cart
                 Cart finalCart = cart;
-                guestCart.getCartItems().forEach(cartItem -> {
-                    cartItemRepository.save(new CartItem(null, cartItem.getSkuId(), cartItem.getQuantity(), cartItem.getIsSelected(),finalCart));
-                });
+                guestCart.getCartItems().forEach(cartItem -> cartItemRepository
+                        .save(new CartItem(null, cartItem.getSkuId(), cartItem.getQuantity(), cartItem.getIsSelected(),finalCart)));
                 cartRepository.delete(guestCart);
             }
 
@@ -69,8 +68,19 @@ public class CartServiceImpl implements CartService {
                     }
                 });
                 cartRepository.delete(guestCart);
-            } else                                                  // Adding new item to user cart
-                cartItemRepository.save(new CartItem(null, cartRequest.getSkuId(), cartRequest.getQuantity(), cartRequest.getIsSelected(), cart));
+            } else {                                                // Adding new item to user cart
+                // Check if SKU already exists in cart
+                CartItem existingCartItem = cartItemRepository.findByCartIdAndSkuId(cart.getCartId(), cartRequest.getSkuId());
+                if (existingCartItem != null) {
+                    // Increment quantity if SKU already exists
+                    existingCartItem.setQuantity(existingCartItem.getQuantity() + cartRequest.getQuantity());
+                    existingCartItem.setIsSelected(cartRequest.getIsSelected());
+                    cartItemRepository.save(existingCartItem);
+                } else {
+                    // Add new item if SKU doesn't exist
+                    cartItemRepository.save(new CartItem(null, cartRequest.getSkuId(), cartRequest.getQuantity(), cartRequest.getIsSelected(), cart));
+                }
+            }
         }
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getCartId());
@@ -87,7 +97,17 @@ public class CartServiceImpl implements CartService {
             cart = cartRepository.save(cart);
             cartItemRepository.save(new CartItem(null, cartRequest.getSkuId(), cartRequest.getQuantity(), cartRequest.getIsSelected(), cart));
         } else {
-            cartItemRepository.save(new CartItem(null, cartRequest.getSkuId(), cartRequest.getQuantity(), cartRequest.getIsSelected(), cart));
+            // Check if SKU already exists in guest cart
+            CartItem existingCartItem = cartItemRepository.findByCartIdAndSkuId(cart.getCartId(), cartRequest.getSkuId());
+            if (existingCartItem != null) {
+                // Increment quantity if SKU already exists
+                existingCartItem.setQuantity(existingCartItem.getQuantity() + cartRequest.getQuantity());
+                existingCartItem.setIsSelected(cartRequest.getIsSelected());
+                cartItemRepository.save(existingCartItem);
+            } else {
+                // Add new item if SKU doesn't exist
+                cartItemRepository.save(new CartItem(null, cartRequest.getSkuId(), cartRequest.getQuantity(), cartRequest.getIsSelected(), cart));
+            }
         }
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getCartId());

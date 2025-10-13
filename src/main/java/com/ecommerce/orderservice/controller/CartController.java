@@ -46,21 +46,19 @@ public class CartController {
                             schema = @Schema(implementation = ErrorResponse.class))})
     })
     @PostMapping("/add")
-    public ResponseEntity<CartResponse> addToCart(@RequestBody CartRequest cartRequest, HttpServletRequest request) {
+    public ResponseEntity<CartResponse> addToCart(@RequestBody CartRequest cartRequest,
+                                                  @RequestHeader(value = "Browser-Session-Id", required = false) String BrowserSessionId,
+                                                  HttpServletRequest request) {
 
-        String browserSessionId;
-        if (request.getHeader(Constants.BROWSER_SESSION_ID) != null) {
-            browserSessionId = request.getHeader(Constants.BROWSER_SESSION_ID);
-        } else {
-            browserSessionId = UUID.randomUUID().toString();
-        }
+        if (BrowserSessionId == null)
+            BrowserSessionId = UUID.randomUUID().toString();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
-            return new ResponseEntity<>(cartService.addToCartLoggedInUser(cartRequest, browserSessionId), HttpStatus.OK);
+            return new ResponseEntity<>(cartService.addToCartLoggedInUser(cartRequest, BrowserSessionId), HttpStatus.OK);
         } else if (request.getHeader(Constants.JWT_HEADER_NAME) == null) {
-            return new ResponseEntity<>(cartService.addToCartGuestUser(cartRequest, browserSessionId), HttpStatus.OK);
+            return new ResponseEntity<>(cartService.addToCartGuestUser(cartRequest, BrowserSessionId), HttpStatus.OK);
         } else {
             return null;
         }
@@ -79,16 +77,12 @@ public class CartController {
                             schema = @Schema(implementation = ErrorResponse.class))})
     })
     @GetMapping("/get")
-    public ResponseEntity<CartResponse> getCart(HttpServletRequest request) {
-
-        String browserSessionId = null;
-        if (request.getHeader(Constants.BROWSER_SESSION_ID) != null) {
-            browserSessionId = request.getHeader(Constants.BROWSER_SESSION_ID);
-        }
-         return new ResponseEntity<>(cartService.getCartItems(browserSessionId,request), HttpStatus.OK);
+    public ResponseEntity<CartResponse> getCart(@RequestHeader(value = "Browser-Session-Id", required = false) String BrowserSessionId,
+                                                HttpServletRequest request) {
+         return new ResponseEntity<>(cartService.getCartItems(BrowserSessionId,request), HttpStatus.OK);
     }
 
-    @Operation(summary = "To remove product from cart", description = "This API is used to remove product from cart for both " +
+    @Operation(summary = "To remove product from cart", description = "It'll take aray of skuIds as input. ppppThis API is used to remove product from cart for both " +
             "logged in and guest users. Browser session id have to be shared in the header for guest users.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Updated Cart Details",
@@ -99,13 +93,10 @@ public class CartController {
                             schema = @Schema(implementation = ErrorResponse.class))})
     })
     @DeleteMapping("/remove")
-    public ResponseEntity<CartResponse> removeFromCart(@RequestBody List<String> skuId, HttpServletRequest request) {
-
-        String browserSessionId = null;
-        if (request.getHeader(Constants.BROWSER_SESSION_ID) != null) {
-            browserSessionId = request.getHeader(Constants.BROWSER_SESSION_ID);
-        }
-        return new ResponseEntity<>(cartService.removeItemFromCart(browserSessionId,skuId,request), HttpStatus.OK);
+    public ResponseEntity<CartResponse> removeFromCart(@RequestBody List<String> skuId,
+                                                       @RequestHeader(value = "Browser-Session-Id", required = false) String BrowserSessionId,
+                                                       HttpServletRequest request) {
+        return new ResponseEntity<>(cartService.removeItemFromCart(BrowserSessionId,skuId,request), HttpStatus.OK);
     }
 
 
